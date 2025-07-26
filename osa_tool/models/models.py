@@ -374,17 +374,15 @@ class ProtollmHandler(ModelHandler):
 
     def send_request(self, prompt: str) -> str:
         """
-        Sends a request to a specified URL with a payload initialized with a given prompt.
-
-        This method initializes a payload with the provided prompt and configuration,
-        sends a POST request to a specified URL with this payload, and logs the response.
+        Sends a request to the language model.
 
         Args:
-            prompt: The prompt to initialize the payload with.
+            prompt: The prompt to send to the model.
 
         Returns:
-            str: The response received from the request.
+            str: The response from the language model.
         """
+
         self.initialize_payload(self.config, prompt)
         messages = self.payload["messages"]
         response = self.client.invoke(messages)

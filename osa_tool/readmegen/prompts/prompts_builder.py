@@ -10,7 +10,37 @@ from osa_tool.utils import extract_readme_content, logger, parse_folder_name
 
 
 class PromptBuilder:
+    """
+    A class for building prompts tailored for analyzing open-source repositories.
+
+    Attributes:
+        None
+
+    Class Methods:
+    - __init__: Initializes the PromptBuilder.
+    - get_prompt_preanalysis: Builds a preanalysis prompt using repository information.
+    - get_prompt_core_features: Builds a prompt focusing on core project features.
+    - get_prompt_overview: Constructs an overview prompt for the repository.
+    - get_prompt_getting_started: Creates a prompt to guide users through initial setup.
+    - get_prompt_deduplicated_install_and_start: Generates a concise installation and start prompt.
+    - get_prompt_files_summary: Builds a prompt summarizing file contents.
+    - get_prompt_pdf_summary: Constructs a prompt based on PDF content.
+    - get_prompt_overview_article: Creates an article overview prompt.
+    - get_prompt_content_article: Generates a content article prompt.
+    - get_prompt_algorithms_article: Builds a prompt focused on algorithms within the repository.
+    - serialize_file_contexts: Serializes file context data into a string format for prompts.
+    """
+
     def __init__(self, config_loader: ConfigLoader):
+        """
+        Initializes the RepoAnalyzer with configuration and repository details.
+
+        Args:
+            config_loader: An instance of ConfigLoader used to load configurations.
+
+        Returns:
+            None
+        """
         self.config_loader = config_loader
         self.config = self.config_loader.config
         self.prompts = PromptLoader().prompts
@@ -75,7 +105,9 @@ class PromptBuilder:
             logger.error(f"Failed to build getting started prompt: {e}")
             raise
 
-    def get_prompt_deduplicated_install_and_start(self, installation: str, getting_started: str) -> str:
+    def get_prompt_deduplicated_install_and_start(
+        self, installation: str, getting_started: str
+    ) -> str:
         """Builds a deduplicating prompt using Installation and Getting Started sections of README."""
         try:
             formatted_prompt = self.prompts["deduplicate_sections"].format(
@@ -101,7 +133,9 @@ class PromptBuilder:
     def get_prompt_pdf_summary(self, pdf_content: str) -> str:
         """Builds a PDF summary prompt using the provided PDF content."""
         try:
-            formatted_prompt = self.prompts_article["pdf_summary"].format(pdf_content=pdf_content)
+            formatted_prompt = self.prompts_article["pdf_summary"].format(
+                pdf_content=pdf_content
+            )
             return formatted_prompt
         except Exception as e:
             logger.error(f"Failed to build PDF summary prompt: {e}")
@@ -120,7 +154,9 @@ class PromptBuilder:
             logger.error(f"Failed to build overview prompt: {e}")
             raise
 
-    def get_prompt_content_article(self, key_files: list[FileContext], pdf_summary: str) -> str:
+    def get_prompt_content_article(
+        self, key_files: list[FileContext], pdf_summary: str
+    ) -> str:
         """Builds a content article prompt using metadata, key file content, and PDF summary."""
         try:
             formatted_prompt = self.prompts_article["content"].format(
@@ -133,7 +169,9 @@ class PromptBuilder:
             logger.error(f"Failed to build content prompt: {e}")
             raise
 
-    def get_prompt_algorithms_article(self, files_summary: str, pdf_summary: str) -> str:
+    def get_prompt_algorithms_article(
+        self, files_summary: str, pdf_summary: str
+    ) -> str:
         """Builds an algorithms article prompt using metadata, file summary, and PDF summary."""
         try:
             formatted_prompt = self.prompts_article["algorithms"].format(

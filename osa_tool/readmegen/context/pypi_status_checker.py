@@ -9,7 +9,25 @@ from osa_tool.utils import logger
 
 
 class PyPiPackageInspector:
+    """
+    Inspects a repository for PyPI package information.
+
+    This class analyzes a file tree to determine if a Python package within the
+    repository is published on PyPI, and if so, retrieves its version and download count.
+    """
+
     def __init__(self, tree: str, base_path: str):
+        """
+        Initializes the RepositoryAnalyzer with a file tree and base path.
+
+        Args:
+            tree: The string representation of the file tree to analyze.
+            base_path: The base path where the repository is located.
+
+        Returns:
+            None
+
+        """
         self.tree = tree
         self.base_path = base_path
         self.api_key = os.getenv("X-API-Key")
@@ -168,7 +186,9 @@ class PyPiPackageInspector:
                 data = response.json()
                 return data.get("total_downloads")
             else:
-                logger.error(f"Request failed for {package_name}. Status code: {response.status_code}. URL: {url}")
+                logger.error(
+                    f"Request failed for {package_name}. Status code: {response.status_code}. URL: {url}"
+                )
         except requests.RequestException as e:
             logger.error(f"Failed to fetch download stats from pepy.tech: {e}")
         return None

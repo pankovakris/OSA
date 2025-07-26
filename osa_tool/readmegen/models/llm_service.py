@@ -13,7 +13,28 @@ from osa_tool.utils import logger
 
 
 class LLMClient:
+    """
+    LLMClient provides an interface for interacting with Large Language Models (LLMs).
+
+    This class encapsulates the logic for sending prompts to an LLM and processing the responses,
+    primarily used for analyzing open-source repositories. It handles tasks such as extracting
+    information about core features, generating overviews, and creating getting started guides.
+
+    Attributes:
+        model: The underlying language model instance.
+        tokenizer: The tokenizer associated with the language model.
+    """
+
     def __init__(self, config_loader: ConfigLoader):
+        """
+        Initializes the DocumentAnalyzer with necessary components.
+
+        Args:
+            config_loader: An instance of ConfigLoader used to load configuration settings.
+
+        Returns:
+            None
+        """
         self.config_loader = config_loader
         self.config = self.config_loader.config
         self.prompts = PromptBuilder(config_loader)
@@ -40,7 +61,9 @@ class LLMClient:
         key_files_content = FileProcessor(self.config_loader, key_files).process_files()
 
         logger.info("Generating core features of the project...")
-        core_features = self.run_request(self.prompts.get_prompt_core_features(key_files_content))
+        core_features = self.run_request(
+            self.prompts.get_prompt_core_features(key_files_content)
+        )
 
         logger.info("Generating project overview...")
         overview = self.run_request(self.prompts.get_prompt_overview(core_features))
@@ -50,8 +73,12 @@ class LLMClient:
 
         logger.info("Attempting to generate Getting Started section...")
         examples_files = extract_example_paths(self.tree)
-        examples_content = FileProcessor(self.config_loader, examples_files).process_files()
-        getting_started = self.run_request(self.prompts.get_prompt_getting_started(examples_content))
+        examples_content = FileProcessor(
+            self.config_loader, examples_files
+        ).process_files()
+        getting_started = self.run_request(
+            self.prompts.get_prompt_getting_started(examples_content)
+        )
         getting_started = process_text(getting_started)
 
         logger.info("README-style summary generation completed.")
@@ -75,7 +102,9 @@ class LLMClient:
         key_files_content = FileProcessor(self.config_loader, key_files).process_files()
 
         logger.info("Generating summary of key files...")
-        files_summary = self.run_request(self.prompts.get_prompt_files_summary(key_files_content))
+        files_summary = self.run_request(
+            self.prompts.get_prompt_files_summary(key_files_content)
+        )
 
         path_to_pdf = get_pdf_path(article)
         pdf_content = PdfParser(path_to_pdf).data_extractor()
@@ -84,13 +113,19 @@ class LLMClient:
         pdf_summary = self.run_request(self.prompts.get_prompt_pdf_summary(pdf_content))
 
         logger.info("Generating project overview from combined sources...")
-        overview = self.run_request(self.prompts.get_prompt_overview_article(files_summary, pdf_summary))
+        overview = self.run_request(
+            self.prompts.get_prompt_overview_article(files_summary, pdf_summary)
+        )
 
         logger.info("Generating content section...")
-        content = self.run_request(self.prompts.get_prompt_content_article(key_files_content, pdf_summary))
+        content = self.run_request(
+            self.prompts.get_prompt_content_article(key_files_content, pdf_summary)
+        )
 
         logger.info("Generating algorithm description...")
-        algorithms = self.run_request(self.prompts.get_prompt_algorithms_article(files_summary, pdf_summary))
+        algorithms = self.run_request(
+            self.prompts.get_prompt_algorithms_article(files_summary, pdf_summary)
+        )
 
         overview = process_text(overview)
         content = process_text(content)
@@ -125,7 +160,9 @@ class LLMClient:
         """Deduplicates information in Installation and Getting Started sections."""
         logger.info("Deduplicating sections Installation and Getting Started...")
         response = self.run_request(
-            self.prompts.get_prompt_deduplicated_install_and_start(installation, getting_started)
+            self.prompts.get_prompt_deduplicated_install_and_start(
+                installation, getting_started
+            )
         )
         response = process_text(response)
         return response

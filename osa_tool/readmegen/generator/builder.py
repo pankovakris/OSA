@@ -27,13 +27,30 @@ class MarkdownBuilder:
         core_features: str = None,
         getting_started: str = None,
     ):
+        """
+        Initializes the RepositoryAnalyzer with configuration and repository details.
+
+        Args:
+            config_loader: An instance of ConfigLoader used to load configurations.
+            overview: Optional JSON string representing the overview section.
+            core_features: Optional JSON string representing the core features section.
+            getting_started: Optional JSON string representing the getting started section.
+
+        Returns:
+            None
+
+        """
         self.config_loader = config_loader
         self.config = self.config_loader.config
         self.sourcerank = SourceRank(self.config_loader)
         self.repo_url = self.config.git.repository
         self.metadata = load_data_metadata(self.repo_url)
-        self.template_path = os.path.join(osa_project_root(), "config", "templates", "template.toml")
-        self.url_path = f"https://{self.config.git.host_domain}/{self.config.git.full_name}/"
+        self.template_path = os.path.join(
+            osa_project_root(), "config", "templates", "template.toml"
+        )
+        self.url_path = (
+            f"https://{self.config.git.host_domain}/{self.config.git.full_name}/"
+        )
         self.branch_path = f"tree/{self.metadata.default_branch}/"
 
         self._overview_json = overview
@@ -41,7 +58,9 @@ class MarkdownBuilder:
         self._getting_started_json = getting_started
 
         self.header = HeaderBuilder(self.config_loader).build_header()
-        self.installation = InstallationSectionBuilder(self.config_loader).build_installation()
+        self.installation = InstallationSectionBuilder(
+            self.config_loader
+        ).build_installation()
         self._template = self.load_template()
 
     def load_template(self) -> dict:
@@ -61,18 +80,32 @@ class MarkdownBuilder:
             return
 
         llm_client = LLMClient(self.config_loader)
-        response = llm_client.deduplicate_sections(self.installation, getting_started_text["getting_started"])
+        response = llm_client.deduplicate_sections(
+            self.installation, getting_started_text["getting_started"]
+        )
         response = json.loads(response)
 
         self.installation = clean_code_block_indents(response["installation"] or "")
         new_getting_started = clean_code_block_indents(response["getting_started"])
         if new_getting_started is not None:
-            self._getting_started_json = json.dumps({"getting_started": new_getting_started})
+            self._getting_started_json = json.dumps(
+                {"getting_started": new_getting_started}
+            )
         else:
             self._getting_started_json = json.dumps({"getting_started": None})
 
     @staticmethod
     def _check_url(url):
+        """
+        Checks if a URL is accessible.
+
+        Args:
+            url: The URL to check.
+
+        Returns:
+            bool: True if the URL returns a 200 status code, False otherwise.
+
+        """
         response = requests.get(url)
         return response.status_code == 200
 
@@ -96,7 +129,8 @@ class MarkdownBuilder:
             return "_No critical features identified._"
 
         formatted_features = "\n".join(
-            f"{i + 1}. **{f['feature_name']}**: {f['feature_description']}" for i, f in enumerate(critical)
+            f"{i + 1}. **{f['feature_name']}**: {f['feature_description']}"
+            for i, f in enumerate(critical)
         )
         return self._template["core_features"].format(formatted_features)
 
@@ -109,7 +143,9 @@ class MarkdownBuilder:
         getting_started_text = json.loads(self._getting_started_json)
         if not getting_started_text["getting_started"]:
             return ""
-        return self._template["getting_started"].format(getting_started_text["getting_started"])
+        return self._template["getting_started"].format(
+            getting_started_text["getting_started"]
+        )
 
     @property
     def examples(self) -> str:
@@ -118,7 +154,11 @@ class MarkdownBuilder:
             return ""
 
         pattern = r"\b(tutorials?|examples|notebooks?)\b"
-        path = self.url_path + self.branch_path + f"{find_in_repo_tree(self.sourcerank.tree, pattern)}"
+        path = (
+            self.url_path
+            + self.branch_path
+            + f"{find_in_repo_tree(self.sourcerank.tree, pattern)}"
+        )
         return self._template["examples"].format(path=path)
 
     @property
@@ -127,19 +167,27 @@ class MarkdownBuilder:
         if not self.metadata.homepage_url:
             if self.sourcerank.docs_presence():
                 pattern = r"\b(docs?|documentation|wiki|manuals?)\b"
-                path = self.url_path + self.branch_path + f"{find_in_repo_tree(self.sourcerank.tree, pattern)}"
+                path = (
+                    self.url_path
+                    + self.branch_path
+                    + f"{find_in_repo_tree(self.sourcerank.tree, pattern)}"
+                )
             else:
                 return ""
         else:
             path = self.metadata.homepage_url
-        return self._template["documentation"].format(repo_name=self.metadata.name, path=path)
+        return self._template["documentation"].format(
+            repo_name=self.metadata.name, path=path
+        )
 
     @property
     def contributing(self) -> str:
         """Generates the README Contributing section"""
         discussions_url = self.url_path + "discussions"
         if self._check_url(discussions_url):
-            discussions = self._template["discussion_section"].format(discussions_url=discussions_url)
+            discussions = self._template["discussion_section"].format(
+                discussions_url=discussions_url
+            )
         else:
             discussions = ""
 
@@ -149,7 +197,11 @@ class MarkdownBuilder:
         if self.sourcerank.contributing_presence():
             pattern = r"\b\w*contribut\w*\.(md|rst|txt)$"
 
-            contributing_url = self.url_path + self.branch_path + find_in_repo_tree(self.sourcerank.tree, pattern)
+            contributing_url = (
+                self.url_path
+                + self.branch_path
+                + find_in_repo_tree(self.sourcerank.tree, pattern)
+            )
             contributing = self._template["contributing_section"].format(
                 contributing_url=contributing_url, name=self.config.git.name
             )
@@ -170,16 +222,28 @@ class MarkdownBuilder:
 
         pattern = r"\bLICEN[SC]E(\.\w+)?\b"
         help_var = find_in_repo_tree(self.sourcerank.tree, pattern)
-        path = self.url_path + self.branch_path + help_var if help_var else self.metadata.license_url
-        return self._template["license"].format(license_name=self.metadata.license_name, path=path)
+        path = (
+            self.url_path + self.branch_path + help_var
+            if help_var
+            else self.metadata.license_url
+        )
+        return self._template["license"].format(
+            license_name=self.metadata.license_name, path=path
+        )
 
     @property
     def citation(self) -> str:
         """Generates the README Citation section"""
         if self.sourcerank.citation_presence():
             pattern = r"\bCITATION(\.\w+)?\b"
-            path = self.url_path + self.branch_path + find_in_repo_tree(self.sourcerank.tree, pattern)
-            return self._template["citation"] + self._template["citation_v1"].format(path=path)
+            path = (
+                self.url_path
+                + self.branch_path
+                + find_in_repo_tree(self.sourcerank.tree, pattern)
+            )
+            return self._template["citation"] + self._template["citation_v1"].format(
+                path=path
+            )
 
         return self._template["citation"] + self._template["citation_v2"].format(
             owner=self.metadata.owner,
@@ -207,7 +271,11 @@ class MarkdownBuilder:
 
         for section_name, section_content in sections.items():
             if section_content:
-                toc.append("- [{}]({})".format(section_name, "#" + re.sub(r"\s+", "-", section_name.lower())))
+                toc.append(
+                    "- [{}]({})".format(
+                        section_name, "#" + re.sub(r"\s+", "-", section_name.lower())
+                    )
+                )
 
         toc.append("\n---")
         return "\n".join(toc)

@@ -15,6 +15,15 @@ from osa_tool.analytics.report_maker import ReportGenerator
 
 
 def test_report_generator_initialization(report_generator):
+    """
+    Tests the initialization of the ReportGenerator class.
+
+    Args:
+        report_generator: The ReportGenerator instance to test.
+
+    Returns:
+        None
+    """
     # Assert
     assert report_generator.repo_url == "https://github.com/testuser/testrepo.git"
     assert report_generator.metadata is not None
@@ -22,6 +31,15 @@ def test_report_generator_initialization(report_generator):
 
 
 def test_generate_qr_code(report_generator):
+    """
+    Generates a QR code and verifies its creation and existence.
+
+    Args:
+        report_generator: The report generator object used to generate the QR code.
+
+    Returns:
+        None
+    """
     # Act
     qr_path = report_generator.generate_qr_code()
     # Assert
@@ -32,6 +50,15 @@ def test_generate_qr_code(report_generator):
 
 
 def test_table_builder(report_generator):
+    """
+    Tests the table builder functionality of the report generator.
+
+    Args:
+        report_generator: The report generator instance to test with.
+
+    Returns:
+        None. Asserts that the table built is an instance of Table.
+    """
     # Arrange
     data = [["Header 1", "Header 2"], ["Row 1", "✓"], ["Row 2", "✗"]]
     # Act
@@ -43,6 +70,17 @@ def test_table_builder(report_generator):
 @patch.object(ReportGenerator, "generate_qr_code", return_value="temp_qr.png")
 @patch("os.remove")
 def test_draw_images_and_tables(mock_remove, mock_generate_qr_code, report_generator):
+    """
+    Draws images and tables onto a canvas.
+
+    Args:
+        mock_remove: Mock object for os.remove function.
+        mock_generate_qr_code: Mock object for ReportGenerator.generate_qr_code method.
+        report_generator: The ReportGenerator instance to test.
+
+    Returns:
+        None
+    """
     # Arrange
     mock_canvas = MagicMock()
     mock_doc = MagicMock()
@@ -55,6 +93,16 @@ def test_draw_images_and_tables(mock_remove, mock_generate_qr_code, report_gener
 
 
 def test_header(report_generator):
+    """
+    Tests the header generation of the report.
+
+    Args:
+        report_generator: The report generator object to test.
+
+    Returns:
+        None
+        Asserts that the generated header contains exactly two elements.
+    """
     # Act
     header_elements = report_generator.header()
     # Assert
@@ -62,6 +110,15 @@ def test_header(report_generator):
 
 
 def test_table_generator(report_generator):
+    """
+    Tests the table generator method of the report generator.
+
+    Args:
+        report_generator: The report generator instance to test.
+
+    Returns:
+        None: This method does not return a value; it asserts conditions based on the generated tables.
+    """
     # Act
     table1, table2 = report_generator.table_generator()
     # Assert
@@ -70,6 +127,16 @@ def test_table_generator(report_generator):
 
 
 def test_body_first_part(report_generator):
+    """
+    Tests the generation of the first part of the report body.
+
+    Args:
+        report_generator: The report generator object to be tested.
+
+    Returns:
+        ListFlowable: The generated first part of the report body.
+
+    """
     # Arrange
     report_generator.metadata = MagicMock()
     report_generator.metadata.created_at = "2025-03-28T14:30:00Z"
@@ -84,6 +151,15 @@ def test_body_first_part(report_generator):
 
 
 def test_body_second_part(report_generator):
+    """
+    Generates the second part of the repository report body.
+
+    Args:
+        report_generator: The report generator object used to create the report.
+
+    Returns:
+        list: A list of Paragraph objects representing the second part of the report body.
+    """
     # Arrange
     report_generator.text_generator = MagicMock()
     report_generator.text_generator.make_request.return_value = RepositoryReport(
@@ -101,7 +177,9 @@ def test_body_second_part(report_generator):
             license_specified=YesNoPartial.NO,
             badges_present=YesNoPartial.PARTIAL,
         ),
-        documentation=CodeDocumentation(tests_present=YesNoPartial.YES, docs_quality="Good", outdated_content=False),
+        documentation=CodeDocumentation(
+            tests_present=YesNoPartial.YES, docs_quality="Good", outdated_content=False
+        ),
         assessment=OverallAssessment(
             key_shortcomings=["Missing tests", "No documentation"],
             recommendations=["Improve tests", "Update docs"],

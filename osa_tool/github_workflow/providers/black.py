@@ -64,6 +64,8 @@ def generate_black_formatter_workflow(
     workflow = {
         "name": name,
         "on": on_section,
-        "jobs": {"lint": {"name": job_name, "runs-on": "ubuntu-latest", "steps": steps}},
+        "jobs": {
+            "lint": {"name": job_name, "runs-on": "ubuntu-latest", "steps": steps}
+        },
     }
     return workflow

@@ -59,7 +59,9 @@ def read_ipynb_file(file_path: str) -> str:
                 lines.append("\n")
         return "\n".join(lines)
     except Exception as e:
-        logger.error(f"Failed to read notebook: {file_path}. Returning empty string. Error: {e}.")
+        logger.error(
+            f"Failed to read notebook: {file_path}. Returning empty string. Error: {e}."
+        )
         return ""
 
 
@@ -86,7 +88,11 @@ def extract_relative_paths(paths: list[str]) -> list[str]:
         list[str]: A list of normalized relative paths.
     """
     try:
-        return [os.path.normpath(path.strip()).replace("\\", "/") for path in paths if path.strip()]
+        return [
+            os.path.normpath(path.strip()).replace("\\", "/")
+            for path in paths
+            if path.strip()
+        ]
     except Exception as e:
         logger.error(f"Failed to extract relative paths from model response: {e}")
         raise
@@ -121,7 +127,9 @@ def extract_example_paths(tree: str):
     Returns:
         list[str]: A list of matched paths excluding __init__.py files.
     """
-    pattern = re.compile(r"\b(tutorials?|examples|docs?|documentation|wiki|manuals?)\b", re.IGNORECASE)
+    pattern = re.compile(
+        r"\b(tutorials?|examples|docs?|documentation|wiki|manuals?)\b", re.IGNORECASE
+    )
     result = []
 
     for line in tree.splitlines():

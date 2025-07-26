@@ -24,12 +24,26 @@ from osa_tool.utils import logger, osa_project_root
 
 
 class ReportGenerator:
+    """
+    Generates a comprehensive report for repository analysis.
+    """
 
     def __init__(
         self,
         config_loader: ConfigLoader,
         sourcerank: SourceRank,
     ):
+        """
+        Initializes the ReportGenerator with configuration and source rank data.
+
+        Args:
+            config_loader: An instance of ConfigLoader used to load configurations.
+            sourcerank: An instance of SourceRank providing source code ranking information.
+
+        Returns:
+            None
+
+        """
         self.config = config_loader.config
         self.sourcerank = sourcerank
         self.text_generator = TextGenerator(config_loader, self.sourcerank)
@@ -37,7 +51,9 @@ class ReportGenerator:
         self.osa_url = "https://github.com/aimclub/OSA"
         self.metadata = load_data_metadata(self.repo_url)
 
-        self.logo_path = os.path.join(osa_project_root(), "docs", "images", "osa_logo.PNG")
+        self.logo_path = os.path.join(
+            osa_project_root(), "docs", "images", "osa_logo.PNG"
+        )
 
         self.filename = f"{self.metadata.name}_report.pdf"
         self.output_path = os.path.join(os.getcwd(), self.filename)
@@ -94,7 +110,9 @@ class ReportGenerator:
         qr.save(qr_path)
         return qr_path
 
-    def draw_images_and_tables(self, canvas_obj: Canvas, doc: SimpleDocTemplate) -> None:
+    def draw_images_and_tables(
+        self, canvas_obj: Canvas, doc: SimpleDocTemplate
+    ) -> None:
         """
         Draws images, a QR code, lines, and tables on the given PDF canvas.
 
@@ -267,15 +285,25 @@ class ReportGenerator:
 
         # Repository Structure
         story.append(Paragraph("<b>Repository Structure:</b>", custom_style))
-        story.append(Paragraph(f"• Compliance: {parsed_report.structure.compliance}", normal_style))
+        story.append(
+            Paragraph(
+                f"• Compliance: {parsed_report.structure.compliance}", normal_style
+            )
+        )
         if parsed_report.structure.missing_files:
             missing_files = ", ".join(parsed_report.structure.missing_files)
             story.append(Paragraph(f"• Missing files: {missing_files}", normal_style))
-        story.append(Paragraph(f"• Organization: {parsed_report.structure.organization}", normal_style))
+        story.append(
+            Paragraph(
+                f"• Organization: {parsed_report.structure.organization}", normal_style
+            )
+        )
 
         # README Analysis
         story.append(Paragraph("<b>README Analysis:</b>", custom_style))
-        story.append(Paragraph(f"• Quality: {parsed_report.readme.readme_quality}", normal_style))
+        story.append(
+            Paragraph(f"• Quality: {parsed_report.readme.readme_quality}", normal_style)
+        )
 
         for field_name, value in parsed_report.readme.model_dump().items():
             if field_name == "readme_quality":

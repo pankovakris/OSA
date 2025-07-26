@@ -7,7 +7,24 @@ from osa_tool.utils import logger, parse_folder_name
 
 
 class DirectoryTranslator:
+    """
+    Translates non-English directory and file names within a repository to English.
+
+    This class handles the translation of directory and file names, updating code imports
+    and paths accordingly to reflect these changes. It leverages a language model for
+    translation and ensures that renaming operations are performed safely, avoiding conflicts.
+    """
+
     def __init__(self, config_loader: ConfigLoader):
+        """
+        Initializes the RepositoryHandler with configuration and sets up paths.
+
+        Args:
+            config_loader: An instance of ConfigLoader providing access to the configuration.
+
+        Returns:
+            None
+        """
         self.config = config_loader.config
         self.repo_url = self.config.git.repository
         self.model_handler: ModelHandler = ModelHandlerFactory.build(self.config)
@@ -41,7 +58,10 @@ class DirectoryTranslator:
         if text in self.excluded_names:
             return text
 
-        prompt = f"Translate into English text: {text} and save every word here.\n" f"Return only the answer."
+        prompt = (
+            f"Translate into English text: {text} and save every word here.\n"
+            f"Return only the answer."
+        )
         response = self.model_handler.send_request(prompt)
         return response.replace(" ", "_")
 
@@ -105,7 +125,9 @@ class DirectoryTranslator:
 
                 all_dirs.extend(os.path.join(root, dirname) for dirname in dirs)
 
-            logger.info(f"Finished collecting all directories of repository ({len(all_dirs)} found)")
+            logger.info(
+                f"Finished collecting all directories of repository ({len(all_dirs)} found)"
+            )
         except Exception as e:
             logger.error("Error: %s", e, exc_info=True)
 
@@ -177,7 +199,9 @@ class DirectoryTranslator:
                 args = re.sub(string_pattern, replace_in_strings, args)
                 return f"{prefix}{args}{suffix}"
 
-            updated_content = re.sub(string_pattern, replace_in_strings, updated_content)
+            updated_content = re.sub(
+                string_pattern, replace_in_strings, updated_content
+            )
             for pattern in path_patterns:
                 updated_content = re.sub(pattern, replace_names, updated_content)
 
@@ -189,11 +213,32 @@ class DirectoryTranslator:
             logger.error(f"Failed to update {file_path}", repr(e), exc_info=True)
 
     def _cycle_update_code(self, rename_map: dict) -> None:
+        """
+        Cycles through all Python files in the repository and updates their code.
+
+        Args:
+            rename_map: A dictionary containing the mapping of old names to new names for renaming purposes.
+
+        Returns:
+            None
+        """
         python_files = self._get_python_files()
         for file in python_files:
             self.update_code(file, rename_map)
 
     def translate_directories(self, all_dirs) -> dict:
+        """
+        Translates directory names using the configured translation method.
+
+        Args:
+            all_dirs: A list of directory paths to potentially rename.
+
+        Returns:
+            dict: A dictionary where keys are original directory names and values
+                  are their translated counterparts.  Only directories that need
+                  renaming (i.e., the new name doesn't already exist) are included.
+
+        """
         rename_map = {}
         try:
             for old_path in all_dirs:
@@ -207,12 +252,28 @@ class DirectoryTranslator:
                 if old_path != new_path and not os.path.exists(new_path):
                     rename_map[dirname] = translated_name
 
-            logger.info(f"Finished generating new names for {len(rename_map)} directories")
+            logger.info(
+                f"Finished generating new names for {len(rename_map)} directories"
+            )
         except Exception as e:
-            logger.error("Error while generating new names for directories: %s", e, exc_info=True)
+            logger.error(
+                "Error while generating new names for directories: %s", e, exc_info=True
+            )
         return rename_map
 
     def translate_files(self, all_files) -> tuple[dict, dict]:
+        """
+        Generates a mapping for renaming files based on translated filenames.
+
+        Args:
+            all_files: A list of file paths to be translated.
+
+        Returns:
+            A tuple containing two dictionaries:
+            - rename_map: Maps original file paths to their new translated paths.
+            - rename_map_code: Maps original filenames (with extension) to their translated names (with extension).
+
+        """
         rename_map = {}
         rename_map_code = {}
         try:
@@ -234,7 +295,9 @@ class DirectoryTranslator:
 
             logger.info(f"Finished generating new names for {len(rename_map)} files")
         except Exception as e:
-            logger.error("Error while generating new names for files: %s", e, exc_info=True)
+            logger.error(
+                "Error while generating new names for files: %s", e, exc_info=True
+            )
 
         return rename_map, rename_map_code
 

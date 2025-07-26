@@ -12,17 +12,39 @@ from osa_tool.utils import osa_project_root, parse_folder_name
 
 
 class InstallationSectionBuilder:
+    """
+    Builds the installation section for a documentation file.
+
+    This class is responsible for constructing the installation instructions based on
+    a provided template and repository data, handling both PyPI and source-based
+    installations.
+    """
+
     def __init__(self, config_loader: ConfigLoader):
+        """
+        Initializes the RepositoryAnalyzer with configuration and repository details.
+
+        Args:
+            config_loader: An instance of ConfigLoader used to load project configuration.
+
+        Returns:
+            None
+
+        """
         self.config_loader = config_loader
         self.config = self.config_loader.config
         self.repo_url = self.config.git.repository
         self.tree = SourceRank(self.config_loader).tree
         self.metadata = load_data_metadata(self.repo_url)
         self.repo_path = os.path.join(os.getcwd(), parse_folder_name(self.repo_url))
-        self.template_path = os.path.join(osa_project_root(), "config", "templates", "template.toml")
+        self.template_path = os.path.join(
+            osa_project_root(), "config", "templates", "template.toml"
+        )
         self._template = self.load_template()
         self.info = PyPiPackageInspector(self.tree, self.repo_path).get_info()
-        self.version = DependencyExtractor(self.tree, self.repo_path).extract_python_version_requirement()
+        self.version = DependencyExtractor(
+            self.tree, self.repo_path
+        ).extract_python_version_requirement()
 
     def load_template(self) -> dict:
         """Loads and parses the TOML template file."""
@@ -62,6 +84,9 @@ class InstallationSectionBuilder:
 
         req_path = find_in_repo_tree(self.tree, r"requirements\.txt")
         if req_path:
-            steps += "3. Install the project dependencies:\n\n" "```sh\npip install -r requirements.txt\n```"
+            steps += (
+                "3. Install the project dependencies:\n\n"
+                "```sh\npip install -r requirements.txt\n```"
+            )
 
         return steps

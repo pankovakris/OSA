@@ -55,7 +55,9 @@ def build_parser_from_yaml(yaml_path: str) -> argparse.ArgumentParser:
 
             group.add_argument(*aliases, **kwargs)
 
-    core_args = {k: v for k, v in config.items() if not isinstance(v, dict) or "type" in v}
+    core_args = {
+        k: v for k, v in config.items() if not isinstance(v, dict) or "type" in v
+    }
     add_arguments(parser, core_args)
 
     for group_name, group_args in config.items():
@@ -67,6 +69,17 @@ def build_parser_from_yaml(yaml_path: str) -> argparse.ArgumentParser:
 
 
 def get_keys_from_group_in_yaml(yaml_path, group_name) -> list:
+    """
+    Retrieves keys from a specified group within a YAML file.
+
+    Args:
+        yaml_path: The path to the YAML file.
+        group_name: The name of the group whose keys are to be extracted.
+
+    Returns:
+        list: A list of keys found within the specified group in the YAML file.
+
+    """
     data = read_arguments_file(yaml_path)
     keys = []
     for key, params in data.items():
@@ -93,6 +106,16 @@ def read_arguments_file_flat(yaml_path) -> dict:
 
 
 def read_arguments_file(yaml_path) -> dict:
+    """
+    Reads arguments from a YAML file.
+
+    Args:
+        yaml_path: The path to the YAML file containing the arguments.
+
+    Returns:
+        dict: A dictionary containing the arguments read from the YAML file.
+
+    """
     with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data

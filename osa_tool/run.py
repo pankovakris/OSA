@@ -127,13 +127,17 @@ def main():
         # Organize repository by adding 'tests' and 'examples' directories if they aren't exist
         if plan.get("organize"):
             rich_section("Repository organization")
-            organizer = RepoOrganizer(os.path.join(os.getcwd(), parse_folder_name(args.repository)))
+            organizer = RepoOrganizer(
+                os.path.join(os.getcwd(), parse_folder_name(args.repository))
+            )
             organizer.organize()
 
         if create_fork and create_pull_request:
             rich_section("Publishing changes")
             github_agent.commit_and_push_changes()
-            github_agent.create_pull_request(body=about_gen.get_about_section_message() if about_gen else "")
+            github_agent.create_pull_request(
+                body=about_gen.get_about_section_message() if about_gen else ""
+            )
 
         if plan.get("delete_dir"):
             rich_section("Repository deletion")
@@ -186,7 +190,9 @@ def generate_docstrings(config_loader: ConfigLoader) -> None:
 
     except Exception as e:
         dg._purge_temp_files(repo_path)
-        logger.error("Error while generating codebase documentaion: %s", repr(e), exc_info=True)
+        logger.error(
+            "Error while generating codebase documentaion: %s", repr(e), exc_info=True
+        )
 
 
 def load_configuration(

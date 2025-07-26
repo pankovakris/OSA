@@ -17,9 +17,13 @@ class PromptConfig(BaseModel):
         description="Generate an additional report describing the analyzed repository for user reference. Does not affect the repository itself.",
     )
     translate_dirs: bool = Field(
-        False, description="Translate directory and file names to English if they are not already in English."
+        False,
+        description="Translate directory and file names to English if they are not already in English.",
     )
-    docstring: bool = Field(False, description="Generate docstrings for functions and classes if .py files is present.")
+    docstring: bool = Field(
+        False,
+        description="Generate docstrings for functions and classes if .py files is present.",
+    )
     ensure_license: Optional[str] = Field(
         None,
         description="Generate a license file for the repository if missing. Set to 'bsd-3', 'mit', or 'ap2' to enable. If None, no license is added.",
@@ -36,7 +40,9 @@ class PromptConfig(BaseModel):
         False,
         description="Organize the repository by adding 'tests' and 'examples' directories if they do not already exist.",
     )
-    about: bool = Field(False, description="Generate About section for the repository if it is missing.")
+    about: bool = Field(
+        False, description="Generate About section for the repository if it is missing."
+    )
 
     model_config = {"extra": "ignore"}
 
@@ -58,7 +64,18 @@ class PromptConfig(BaseModel):
 
 
 class PromptLoader:
+    """
+    Loads prompts from a file.
+
+    This class is responsible for loading prompts from a TOML file and
+    making them available for use. It handles file path resolution and
+    basic validation of the loaded prompts.
+    """
+
     def __init__(self):
+        """
+        Initializes the PromptManager with loaded prompts.
+        """
         self.prompts = self.load_prompts()
 
     def load_prompts(self) -> dict:
@@ -75,7 +92,9 @@ class PromptLoader:
         """
         Helper method to get the correct resource path.
         """
-        file_path = os.path.join(osa_project_root(), "config", "settings", "prompt_for_scheduler.toml")
+        file_path = os.path.join(
+            osa_project_root(), "config", "settings", "prompt_for_scheduler.toml"
+        )
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Prompts file {file_path} not found.")
         return str(file_path)

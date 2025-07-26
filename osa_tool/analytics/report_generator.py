@@ -15,14 +15,34 @@ from osa_tool.utils import extract_readme_content, osa_project_root, parse_folde
 
 
 class TextGenerator:
+    """
+    A class for generating text based on a given prompt and model.
+
+    Attributes:
+        model_handler: An instance responsible for interacting with the underlying language model.
+        prompt_template: The template string used to construct prompts for the model.
+    """
+
     def __init__(self, config_loader: ConfigLoader, sourcerank: SourceRank):
+        """
+        Initializes the RepositoryAnalyzer with configuration and source rank data.
+
+        Args:
+            config_loader: An instance providing access to the project configuration.
+            sourcerank: An instance of SourceRank for ranking sources.
+
+        Returns:
+            None
+        """
         self.config = config_loader.config
         self.sourcerank = sourcerank
         self.model_handler: ModelHandler = ModelHandlerFactory.build(self.config)
         self.repo_url = self.config.git.repository
         self.metadata = load_data_metadata(self.repo_url)
         self.base_path = os.path.join(os.getcwd(), parse_folder_name(self.repo_url))
-        self.prompt_path = os.path.join(osa_project_root(), "config", "settings", "prompt_for_analysis.toml")
+        self.prompt_path = os.path.join(
+            osa_project_root(), "config", "settings", "prompt_for_analysis.toml"
+        )
 
     def make_request(self) -> RepositoryReport:
         """

@@ -14,6 +14,17 @@ class DependencyExtractor:
     """
 
     def __init__(self, tree: str, base_path: str):
+        """
+        Initializes the DependencyAnalyzer with a file tree and base path.
+
+        Args:
+            tree: The string representation of the file tree.
+            base_path: The base path for resolving relative paths.
+
+        Returns:
+            None
+
+        """
         self.tree = tree
         self.base_path = base_path
 
@@ -56,7 +67,9 @@ class DependencyExtractor:
                     return version.strip()
 
                 # Poetry format
-                poetry_info = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+                poetry_info = (
+                    data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+                )
                 if "python" in poetry_info:
                     python_spec = poetry_info["python"]
                     return python_spec.strip() if isinstance(python_spec, str) else None
@@ -129,7 +142,9 @@ class DependencyExtractor:
                 techs.update(self._normalize_dependency(dep) for dep in deps)
 
                 # Poetry
-                poetry_deps = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+                poetry_deps = (
+                    data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+                )
                 techs.update(name.lower() for name in poetry_deps.keys())
 
             except tomli.TOMLDecodeError:
@@ -163,9 +178,31 @@ class DependencyExtractor:
 
     @staticmethod
     def _normalize_dependency(dep: str) -> str:
+        """
+        Normalizes a dependency string.
+
+        Removes any extra information after the first space or semicolon,
+        and converts the dependency name to lowercase.
+
+        Args:
+            dep: The dependency string to normalize.
+
+        Returns:
+            str: The normalized dependency string.
+        """
         return dep.split()[0].split(";")[0].strip().lower()
 
     def _find_file(self, pattern: str) -> str | None:
+        """
+        Finds a file matching the given pattern within the repository.
+
+        Args:
+            pattern: The pattern to search for in the repository tree. This is used by `find_in_repo_tree` as a regular expression.
+
+        Returns:
+            str: The absolute path to the first file that matches the pattern, or None if no such file exists.
+
+        """
         rel_path = find_in_repo_tree(self.tree, pattern)
         if rel_path:
             abs_path = os.path.join(self.base_path, rel_path)

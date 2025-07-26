@@ -22,6 +22,14 @@ console = Console()
 
 
 class PlanEditor:
+    """
+    PlanEditor class for editing and confirming plans.
+
+    This class provides functionality to display, edit, and confirm a plan,
+    potentially including GitHub workflow configurations. It allows for both
+    automatic generation and manual adjustments of the plan.
+    """
+
     def __init__(self, workflow_keys: list):
         self.workflow_keys = workflow_keys
         self.info_keys = [
@@ -60,7 +68,9 @@ class PlanEditor:
                 sys.exit(0)
             elif confirm == "custom":
                 plan = self._manual_plan_edit(plan)
-                console.print("\n[bold green]Updated plan after your edits:[/bold green]")
+                console.print(
+                    "\n[bold green]Updated plan after your edits:[/bold green]"
+                )
                 self._print_plan_tables(plan)
                 continue
             else:
@@ -80,7 +90,9 @@ class PlanEditor:
         editable_keys = [k for k in plan.keys() if k not in self.info_keys]
         bool_keys = [k for k in editable_keys if isinstance(plan.get(k), bool)]
 
-        console.print(f"\nAvailable keys for editing: [cyan]{', '.join(editable_keys)}[/cyan]\n")
+        console.print(
+            f"\nAvailable keys for editing: [cyan]{', '.join(editable_keys)}[/cyan]\n"
+        )
 
         completer = WordCompleter(editable_keys, ignore_case=True)
         session = PromptSession()
@@ -115,11 +127,15 @@ class PlanEditor:
                         break
 
                     # Key parsing
-                    keys_list = [k.strip() for k in keys_input.replace(",", " ").split()]
+                    keys_list = [
+                        k.strip() for k in keys_input.replace(",", " ").split()
+                    ]
                     invalid_keys = [k for k in keys_list if k not in bool_keys]
 
                     if invalid_keys:
-                        console.print(f"[red]Invalid boolean keys: {', '.join(invalid_keys)}[/red]")
+                        console.print(
+                            f"[red]Invalid boolean keys: {', '.join(invalid_keys)}[/red]"
+                        )
                         continue
 
                     new_value = Prompt.ask(
@@ -142,11 +158,15 @@ class PlanEditor:
                 continue
 
             if key_to_edit not in editable_keys:
-                console.print(f"[red]Key '{key_to_edit}' not found or not editable.[/red] Try again.")
+                console.print(
+                    f"[red]Key '{key_to_edit}' not found or not editable.[/red] Try again."
+                )
                 continue
 
             current_value = plan[key_to_edit]
-            console.print(f"\n[cyan]{key_to_edit}[/cyan] (current value: [green]{current_value}[/green])")
+            console.print(
+                f"\n[cyan]{key_to_edit}[/cyan] (current value: [green]{current_value}[/green])"
+            )
             self._print_key_info(key_to_edit)
 
             if isinstance(current_value, bool):
@@ -187,7 +207,9 @@ class PlanEditor:
                     self._mark_key_as_changed(key_to_edit, plan)
 
             else:
-                console.print(f"[yellow]Unsupported type for key '{key_to_edit}'. Skipping.[/yellow]")
+                console.print(
+                    f"[yellow]Unsupported type for key '{key_to_edit}'. Skipping.[/yellow]"
+                )
 
         return plan
 
@@ -196,7 +218,9 @@ class PlanEditor:
 
         # Info section in console output
         console.print("\n[bold cyan]Repository and environment info:[/bold cyan]")
-        info_table = Table(show_header=True, header_style="bold magenta", box=box.SIMPLE)
+        info_table = Table(
+            show_header=True, header_style="bold magenta", box=box.SIMPLE
+        )
         info_table.add_column("Key")
         info_table.add_column("Value")
 
@@ -207,7 +231,9 @@ class PlanEditor:
 
         # Active actions in console output
         console.print("\n[bold green]Planned actions:[/bold green]")
-        actions_table = Table(show_header=True, header_style="bold green", box=box.SIMPLE)
+        actions_table = Table(
+            show_header=True, header_style="bold green", box=box.SIMPLE
+        )
         actions_table.add_column("Key")
         actions_table.add_column("Value")
 
@@ -223,7 +249,9 @@ class PlanEditor:
 
         # Inactive actions in console output
         console.print("\n[bold red]Inactive actions:[/bold red]")
-        inactive_table = Table(show_header=True, header_style="bold red", box=box.SIMPLE)
+        inactive_table = Table(
+            show_header=True, header_style="bold red", box=box.SIMPLE
+        )
         inactive_table.add_column("Key")
         inactive_table.add_column("Value")
 
@@ -299,7 +327,9 @@ class PlanEditor:
             else:
                 groups["General"].append((key, meta))
 
-        console.print("\n[bold yellow]Use this help to see available keys you can edit in custom mode.[/bold yellow]\n")
+        console.print(
+            "\n[bold yellow]Use this help to see available keys you can edit in custom mode.[/bold yellow]\n"
+        )
 
         for group_name in ordered_group_names:
             items = groups.get(group_name)
@@ -308,7 +338,9 @@ class PlanEditor:
 
             console.print(f"\n[bold underline blue]{group_name}[/bold underline blue]")
 
-            help_table = Table(show_header=True, header_style="bold blue", box=box.SIMPLE)
+            help_table = Table(
+                show_header=True, header_style="bold blue", box=box.SIMPLE
+            )
             help_table.add_column("Key", style="cyan")
             help_table.add_column("Type", style="magenta")
             help_table.add_column("Description")
@@ -317,7 +349,11 @@ class PlanEditor:
             for key, meta in sorted(items):
                 arg_type = meta.get("type", "str")
                 description = meta.get("description", "-")
-                choices = ", ".join(map(str, meta.get("choices", []))) if "choices" in meta else "-"
+                choices = (
+                    ", ".join(map(str, meta.get("choices", [])))
+                    if "choices" in meta
+                    else "-"
+                )
 
                 help_table.add_row(key, arg_type, description, choices)
 
@@ -352,7 +388,9 @@ class PlanEditor:
         else:
             return str(value) in map(str, choices)
 
-    def _prompt_and_validate_value(self, key: str, prompt_text: str, value_type: str = "str", default: str = ""):
+    def _prompt_and_validate_value(
+        self, key: str, prompt_text: str, value_type: str = "str", default: str = ""
+    ):
         """Prompt user for a value and validate it against choices if available."""
         while True:
             user_input = Prompt.ask(prompt_text, default=default)
@@ -365,7 +403,11 @@ class PlanEditor:
             elif user_input == "":
                 return "keep_current"
 
-            value = [item.strip() for item in user_input.split(",")] if value_type == "list" else user_input
+            value = (
+                [item.strip() for item in user_input.split(",")]
+                if value_type == "list"
+                else user_input
+            )
 
             if self._validate_input(key, value):
                 return value
@@ -396,24 +438,72 @@ class PlanEditor:
                 plan["generate_workflows"] = False
                 self._manual_disable_generate_workflows = False
         else:
-            if any_enabled and not getattr(self, "_manual_disable_generate_workflows", False):
+            if any_enabled and not getattr(
+                self, "_manual_disable_generate_workflows", False
+            ):
                 plan["generate_workflows"] = True
 
     def _workflow_boolean_keys(self, plan: dict, exclude: set[str] = None) -> list[str]:
         """Return workflow keys with boolean values only."""
         exclude = exclude or set()
-        return [k for k in self.workflow_keys if isinstance(plan.get(k), bool) and k not in exclude]
+        return [
+            k
+            for k in self.workflow_keys
+            if isinstance(plan.get(k), bool) and k not in exclude
+        ]
 
     def _format_key_label(self, key: str) -> str:
+        """
+        Formats a key label based on whether it has been modified.
+
+        Args:
+            key: The key to format.
+
+        Returns:
+            str: The formatted key label, with an asterisk appended if the key is in
+                 the set of modified keys; otherwise, returns the original key.
+        """
         return f"{key} *" if key in self.modified_keys else key
 
 
 class MultiWordCompleter(Completer):
+    """
+    Completes multi-word phrases based on a provided word list.
+
+    This class is designed to suggest completions for multiple words,
+    useful in scenarios like code completion or text prediction where
+    context beyond single words matters.
+    """
+
     def __init__(self, words, ignore_case=False):
+        """
+        Initializes the WordFilter object.
+
+        Args:
+            words: The list of words to filter.
+            ignore_case: Whether to ignore case when filtering.
+
+        Returns:
+            None
+        """
+
         self.words = words
         self.ignore_case = ignore_case
 
-    def get_completions(self, document: Document, complete_event: CompleteEvent) -> Iterable[Completion]:
+    def get_completions(
+        self, document: Document, complete_event: CompleteEvent
+    ) -> Iterable[Completion]:
+        """
+        Yields completion suggestions based on the current document content.
+
+        Args:
+            document: The document being edited.
+            complete_event: The event triggering the completion request.
+
+        Returns:
+            Iterable[Completion]: An iterable of Completion objects representing possible completions.
+
+        """
         text_before_cursor = document.text_before_cursor
 
         parts = re.split(r"[,\s]+", text_before_cursor)

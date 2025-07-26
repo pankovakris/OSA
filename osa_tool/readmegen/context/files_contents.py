@@ -23,6 +23,16 @@ class FileProcessor:
     """
 
     def __init__(self, config_loader: ConfigLoader, core_files: list[str]):
+        """
+        Initializes a new instance of the class.
+
+        Args:
+            config_loader: The config loader object containing configuration details.
+            core_files: A list of core file paths to be analyzed.
+
+        Returns:
+            None
+        """
         self.config = config_loader.config
         self.core_files = core_files
         self.repo_url = self.config.git.repository
@@ -37,4 +47,6 @@ class FileProcessor:
         """Create a file context object for the given file path."""
         abs_file_path = os.path.join(self.repo_path, file_path)
         content = read_file(abs_file_path)[: self.length_of_content]
-        return FileContext(path=file_path, name=os.path.basename(file_path), content=content)
+        return FileContext(
+            path=file_path, name=os.path.basename(file_path), content=content
+        )

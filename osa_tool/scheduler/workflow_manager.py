@@ -15,7 +15,26 @@ class WorkflowManager:
     Detects existing jobs, builds a plan for workflow generation.
     """
 
-    def __init__(self, base_path: str, sourcerank: SourceRank, metadata: RepositoryMetadata, workflows_plan: dict):
+    def __init__(
+        self,
+        base_path: str,
+        sourcerank: SourceRank,
+        metadata: RepositoryMetadata,
+        workflows_plan: dict,
+    ):
+        """
+        Initializes the RepositoryWorkflows class.
+
+        Args:
+            base_path: The base path of the repository.
+            sourcerank: An instance of SourceRank.
+            metadata: An instance of RepositoryMetadata.
+            workflows_plan: A dictionary representing the workflows plan.
+
+        Returns:
+            None
+
+        """
         self.base_path = base_path
         self.sourcerank = sourcerank
         self.metadata = metadata
@@ -29,14 +48,21 @@ class WorkflowManager:
             "include_pep8": ["lint", "Lint", "pep8_check"],
             "include_autopep8": "autopep8",
             "include_fix_pep8": ["fix_pep8_command", "fix-pep8"],
-            "slash-command-dispatch": ["slash_command_dispatch", "slashCommandDispatch"],
+            "slash-command-dispatch": [
+                "slash_command_dispatch",
+                "slashCommandDispatch",
+            ],
             "pypi-publish": ["pypi_publish", "pypi-publish"],
         }
 
     def _find_workflows_directory(self) -> str | None:
         """Locate the '.github/workflows' directory if it exists."""
         workflows_dir = os.path.join(self.base_path, ".github", "workflows")
-        return workflows_dir if os.path.exists(workflows_dir) and os.path.isdir(workflows_dir) else None
+        return (
+            workflows_dir
+            if os.path.exists(workflows_dir) and os.path.isdir(workflows_dir)
+            else None
+        )
 
     def _has_python_code(self) -> bool:
         """Check whether the repository contains Python code."""
@@ -103,13 +129,21 @@ class WorkflowManager:
                 result_plan[key] = default_value and has_tests and not job_exists
             elif key == "include_pep8":
                 result_plan[key] = default_value and not job_exists
-            elif key in ["include_autopep8", "include_fix_pep8", "slash-command-dispatch", "pypi-publish"]:
+            elif key in [
+                "include_autopep8",
+                "include_fix_pep8",
+                "slash-command-dispatch",
+                "pypi-publish",
+            ]:
                 result_plan[key] = default_value and not job_exists
             else:
                 result_plan[key] = default_value
 
         # Set generate_workflows flag if any relevant workflow key is enabled
-        generate = any(key not in self.excluded_keys and value is True for key, value in result_plan.items())
+        generate = any(
+            key not in self.excluded_keys and value is True
+            for key, value in result_plan.items()
+        )
         result_plan["generate_workflows"] = generate
 
         return result_plan
@@ -127,7 +161,9 @@ def update_workflow_config(config_loader, plan: dict, workflow_keys: list) -> No
     workflow_settings = {}
     for key in workflow_keys:
         workflow_settings[key] = plan.get(key)
-    config_loader.config.workflows = config_loader.config.workflows.model_copy(update=workflow_settings)
+    config_loader.config.workflows = config_loader.config.workflows.model_copy(
+        update=workflow_settings
+    )
     logger.info("Config successfully updated with workflow_settings")
 
 
@@ -144,15 +180,22 @@ def generate_github_workflows(config_loader: ConfigLoader) -> None:
         # Get the workflow settings from the config
         workflow_settings = config_loader.config.workflows
         repo_url = config_loader.config.git.repository
-        output_dir = os.path.join(os.getcwd(), parse_folder_name(repo_url), workflow_settings.output_dir)
+        output_dir = os.path.join(
+            os.getcwd(), parse_folder_name(repo_url), workflow_settings.output_dir
+        )
 
         created_files = generate_workflows_from_settings(workflow_settings, output_dir)
 
         if created_files:
             formatted_files = "\n".join(f" - {file}" for file in created_files)
-            logger.info("Successfully generated the following workflow files:\n%s", formatted_files)
+            logger.info(
+                "Successfully generated the following workflow files:\n%s",
+                formatted_files,
+            )
         else:
             logger.info("No workflow files were generated.")
 
     except Exception as e:
-        logger.error("Error while generating GitHub workflows: %s", repr(e), exc_info=True)
+        logger.error(
+            "Error while generating GitHub workflows: %s", repr(e), exc_info=True
+        )

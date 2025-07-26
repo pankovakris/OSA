@@ -20,9 +20,14 @@ class MarkdownBuilderArticle:
         content: str = None,
         algorithms: str = None,
     ):
+        """
+        No valid docstring found.
+        """
         self.config_loader = config_loader
         self.config = self.config_loader.config
-        self.template_path = os.path.join(osa_project_root(), "config", "templates", "template_article.toml")
+        self.template_path = os.path.join(
+            osa_project_root(), "config", "templates", "template_article.toml"
+        )
 
         self._overview_json = overview
         self._content_json = content
@@ -40,7 +45,18 @@ class MarkdownBuilderArticle:
 
     @property
     def header(self):
-        return self._template["headers"].format(project_name=self.config.git.name, info_badges=self.header_badges)
+        """
+        Returns the project header string.
+
+        Args:
+            None
+
+        Returns:
+            str: The formatted project header string including project name and badges.
+        """
+        return self._template["headers"].format(
+            project_name=self.config.git.name, info_badges=self.header_badges
+        )
 
     @property
     def overview(self) -> str:

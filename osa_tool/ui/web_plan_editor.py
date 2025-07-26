@@ -13,8 +13,20 @@ class WebPlanEditor:
     """
 
     def __init__(self, plan: dict):
+        """
+        Initializes an OSA Plan object.
+
+        Args:
+            plan: The plan dictionary containing the OSA configuration.
+
+        Returns:
+            None
+
+        """
         self.plan = plan
-        self.file_path = os.path.join(tempfile.gettempdir(), f"osa_plan_{uuid.uuid4().hex}.json")
+        self.file_path = os.path.join(
+            tempfile.gettempdir(), f"osa_plan_{uuid.uuid4().hex}.json"
+        )
         os.environ["OSA_PLAN_PATH"] = self.file_path
         self.save_plan()
 

@@ -21,7 +21,21 @@ class ModeScheduler:
     based on repository analysis, configuration, and selected execution mode.
     """
 
-    def __init__(self, config: ConfigLoader, sourcerank: SourceRank, args, workflow_keys: list):
+    def __init__(
+        self, config: ConfigLoader, sourcerank: SourceRank, args, workflow_keys: list
+    ):
+        """
+        Initializes the RepositoryAnalyzer with configuration and arguments.
+
+        Args:
+            config: Configuration object containing settings for the analysis.
+            sourcerank: SourceRank instance for ranking source code elements.
+            args: Parsed command-line arguments.
+            workflow_keys: List of keys representing valid workflow options.
+
+        Returns:
+            None
+        """
         self.mode = args.mode
         self.args = args
         self.workflow_keys = workflow_keys
@@ -32,7 +46,11 @@ class ModeScheduler:
         self.metadata = load_data_metadata(self.repo_url)
         self.base_path = os.path.join(os.getcwd(), parse_folder_name(self.repo_url))
         self.prompts = PromptLoader().prompts
-        self.workflows_plan = {key: value for key, value in vars(self.args).items() if key in self.workflow_keys}
+        self.workflows_plan = {
+            key: value
+            for key, value in vars(self.args).items()
+            if key in self.workflow_keys
+        }
         self.plan = self._select_plan()
 
     @staticmethod
